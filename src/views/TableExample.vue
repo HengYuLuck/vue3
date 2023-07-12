@@ -21,7 +21,7 @@
 
     </a-form>
   </a-modal>
-  <a-table bordered :data-source="dataSource" :columns="columns">
+  <a-table bordered :data-source="dataSource" :columns="columns" :loading="loading">
     <template #bodyCell="{ column, text, record }">
       <template v-if="column.dataIndex === 'name'">
         <div class="editable-cell">
@@ -69,18 +69,20 @@ const columns = [{
   title: 'operation',
   dataIndex: 'operation',
 }];
+
 interface DataItem {
   key: string;
   name: string;
   age: number;
   address: string;
 }
+
 const data: DataItem[] = [];
 for (let i = 0; i < 100; i++) {
   data.push({
     key: i.toString(),
     name: `Edrward ${i}`,
-    age: i+1,
+    age: i + 1,
     address: `London Park no. ${i}`,
   });
 }
@@ -95,11 +97,16 @@ const save = key => {
   delete editableData[key];
 };
 const onDelete = key => {
-  dataSource.value = dataSource.value.filter(item => item.key !== key);
+  loading.value = true;
+  setTimeout(() => {
+    dataSource.value = dataSource.value.filter(item => item.key !== key);
+    loading.value = false;
+  }, 1000);
 };
 const visible = ref<boolean>(false);
 const formRef = ref<FormInstance>();
 const actionType = ref<string>('');
+const loading = ref<boolean>(false);
 const showModal = (type, record) => {
   actionType.value = type;
   visible.value = true;
@@ -121,19 +128,27 @@ const showModal = (type, record) => {
 };
 const handleOk = () => {
   if (actionType.value === 'add') {
-    const newData = {
-      key: `${count.value}`,
-      name: formState.user.name,
-      age: formState.user.age,
-      address: formState.user.address,
-    };
-    dataSource.value.push(newData);
+    loading.value = true;
+    setTimeout(() => {
+      const newData = {
+        key: `${count.value}`,
+        name: formState.user.name,
+        age: formState.user.age,
+        address: formState.user.address,
+      };
+      dataSource.value.push(newData);
+      loading.value = false;
+    }, 1000);
   } else {
-    dataSource.value.forEach((item, index) => {
-      if (item.key.indexOf(formState.user.key) > -1) {
-        dataSource.value.splice(index, 1, formState.user);
-      }
-    })
+    loading.value = true;
+    setTimeout(() => {
+      dataSource.value.forEach((item, index) => {
+        if (item.key.indexOf(formState.user.key) > -1) {
+          dataSource.value.splice(index, 1, formState.user);
+        }
+      })
+      loading.value = false;
+    }, 1000);
   }
   visible.value = false;
 };
