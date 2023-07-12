@@ -1,5 +1,5 @@
 <template>
-  <a-button class="editable-add-btn" style="margin-bottom: 8px" @click="showModal('add')">Add</a-button>
+  <a-button class="editable-add-btn" style="margin-bottom: 8px" @click="showModal('add','')">Add</a-button>
   <a-modal v-model:visible="visible" title="Basic Modal" @ok="handleOk">
     <a-form
         ref="formRef"
@@ -50,152 +50,120 @@
   </a-table>
 </template>
 <script lang="ts" setup>
-import {computed, defineComponent, reactive, ref} from 'vue';
+import {computed, reactive, ref} from 'vue';
 import {CheckOutlined, EditOutlined} from '@ant-design/icons-vue';
 import {cloneDeep} from 'lodash-es';
 import type {FormInstance} from 'ant-design-vue';
 
-// export default defineComponent({
-//   components: {
-//     CheckOutlined,
-//     EditOutlined,
-//   },
-//   setup() {
-    const columns = [{
-      title: 'name',
-      dataIndex: 'name',
-      width: '30%',
-    }, {
-      title: 'age',
-      dataIndex: 'age',
-    }, {
-      title: 'address',
-      dataIndex: 'address',
-    }, {
-      title: 'operation',
-      dataIndex: 'operation',
-    }];
-    const dataSource = ref([{
+const columns = [{
+  title: 'name',
+  dataIndex: 'name',
+  width: '30%',
+}, {
+  title: 'age',
+  dataIndex: 'age',
+}, {
+  title: 'address',
+  dataIndex: 'address',
+}, {
+  title: 'operation',
+  dataIndex: 'operation',
+}];
+interface DataItem {
+  key: string;
+  name: string;
+  age: number;
+  address: string;
+}
+const data: DataItem[] = [];
+for (let i = 0; i < 100; i++) {
+  data.push({
+    key: i.toString(),
+    name: `Edrward ${i}`,
+    age: i+1,
+    address: `London Park no. ${i}`,
+  });
+}
+const dataSource = ref(data);
+const count = computed(() => dataSource.value.length + 1);
+const editableData = reactive({});
+const edit = key => {
+  editableData[key] = cloneDeep(dataSource.value.filter(item => key === item.key)[0]);
+};
+const save = key => {
+  Object.assign(dataSource.value.filter(item => key === item.key)[0], editableData[key]);
+  delete editableData[key];
+};
+const onDelete = key => {
+  dataSource.value = dataSource.value.filter(item => item.key !== key);
+};
+const visible = ref<boolean>(false);
+const formRef = ref<FormInstance>();
+const actionType = ref<string>('');
+const showModal = (type, record) => {
+  actionType.value = type;
+  visible.value = true;
+  if (type === 'add') {
+    formState.user = {
       key: '0',
-      name: 'Edward King 0',
-      age: 32,
-      address: 'London, Park Lane no. 0',
-    }, {
-      key: '1',
-      name: 'Edward King 1',
-      age: 32,
-      address: 'London, Park Lane no. 1',
-    }]);
-    const count = computed(() => dataSource.value.length + 1);
-    const editableData = reactive({});
-    const edit = key => {
-      editableData[key] = cloneDeep(dataSource.value.filter(item => key === item.key)[0]);
+      name: '',
+      age: 0,
+      address: '',
+    }
+  } else {
+    formState.user = {
+      key: record.key,
+      name: record.name,
+      age: record.age,
+      address: record.address,
+    }
+  }
+};
+const handleOk = () => {
+  if (actionType.value === 'add') {
+    const newData = {
+      key: `${count.value}`,
+      name: formState.user.name,
+      age: formState.user.age,
+      address: formState.user.address,
     };
-    const save = key => {
-      Object.assign(dataSource.value.filter(item => key === item.key)[0], editableData[key]);
-      delete editableData[key];
-    };
-    const onDelete = key => {
-      dataSource.value = dataSource.value.filter(item => item.key !== key);
-    };
-    const handleAdd = () => {
-      const newData = {
-        key: `${count.value}`,
-        name: `Edward King ${count.value}`,
-        age: 32,
-        address: `London, Park Lane no. ${count.value}`,
-      };
-      dataSource.value.push(newData);
-    };
-    const visible = ref<boolean>(false);
-    const formRef = ref<FormInstance>();
-    const actionType = ref<string>('');
-    const currentIndex = ref<number>(0);
-    const showModal = (type, record) => {
-      actionType.value = type;
-      visible.value = true;
-      if (type === 'add') {
-        formState.user = {
-          key: '0',
-          name: '',
-          age: 0,
-          address: '',
-        }
-      } else {
-        formState.user = {
-          key: record.key,
-          name: record.name,
-          age: record.age,
-          address: record.address,
-        }
+    dataSource.value.push(newData);
+  } else {
+    dataSource.value.forEach((item, index) => {
+      if (item.key.indexOf(formState.user.key) > -1) {
+        dataSource.value.splice(index, 1, formState.user);
       }
-    };
-    const handleOk = () => {
-      if (actionType.value === 'add') {
-        const newData = {
-          key: `${count.value}`,
-          name: formState.user.name,
-          age: formState.user.age,
-          address: formState.user.address,
-        };
-        dataSource.value.push(newData);
-      } else {
-        dataSource.value.forEach((item, index) => {
-          if (item.key.indexOf(formState.user.key) > -1) {
-            dataSource.value.splice(index, 1, formState.user);
-          }
-        })
-      }
-      visible.value = false;
-    };
-    /*表单*/
-    const layout = {
-      labelCol: {span: 4},
-      wrapperCol: {span: 22},
-    };
+    })
+  }
+  visible.value = false;
+};
+/*表单*/
+const layout = {
+  labelCol: {span: 4},
+  wrapperCol: {span: 22},
+};
 
-    const validateMessages = {
-      required: '${label} is required!',
-      types: {
-        number: '${label} is not a valid number!',
-      },
-      number: {
-        range: '${label} must be between ${min} and ${max}',
-      },
-    };
+const validateMessages = {
+  required: '${label} is required!',
+  types: {
+    number: '${label} is not a valid number!',
+  },
+  number: {
+    range: '${label} must be between ${min} and ${max}',
+  },
+};
 
-    const formState = reactive({
-      user: {
-        key: '0',
-        name: '',
-        age: 0,
-        address: '',
-      },
-    });
-    const onFinish = (values: any) => {
-      console.log('Success:', values);
-    };
-    // return {
-    //   columns,
-    //   onDelete,
-    //   handleAdd,
-    //   dataSource,
-    //   editableData,
-    //   count,
-    //   edit,
-    //   save,
-    //   visible,
-    //   showModal,
-    //   handleOk,
-    //   formState,
-    //   onFinish,
-    //   layout,
-    //   validateMessages,
-    //   actionType,
-    //   formRef,
-    // };
-//   },
-// });
+const formState = reactive({
+  user: {
+    key: '0',
+    name: '',
+    age: 0,
+    address: '',
+  },
+});
+const onFinish = (values: any) => {
+  console.log('Success:', values);
+};
 </script>
 <style lang="less">
 .editable-cell {
