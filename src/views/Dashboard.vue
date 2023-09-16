@@ -43,3 +43,8 @@ onMounted(async () => {
     <p id="quote">{{ poem }}</p>
   </div>
 </template>
+<style scoped lang="scss">
+#app {
+  height: 100vh;
+}
+</style>
