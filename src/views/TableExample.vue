@@ -1,54 +1,3 @@
-<template>
-  <a-button class="editable-add-btn" style="margin-bottom: 8px" @click="showModal('add','')">Add</a-button>
-  <a-modal v-model:visible="visible" title="Basic Modal" @ok="handleOk">
-    <a-form
-        ref="formRef"
-        :model="formState"
-        v-bind="layout"
-        name="nest-messages"
-        :validate-messages="validateMessages"
-        @finish="onFinish"
-    >
-      <a-form-item :name="['user', 'name']" label="Name" :rules="[{ required: true }]">
-        <a-input v-model:value="formState.user.name"/>
-      </a-form-item>
-      <a-form-item :name="['user', 'age']" label="Age" :rules="[{ type: 'number', min: 0, max: 99 }]">
-        <a-input-number v-model:value="formState.user.age"/>
-      </a-form-item>
-      <a-form-item :name="['user', 'address']" label="Address">
-        <a-input v-model:value="formState.user.address"/>
-      </a-form-item>
-
-    </a-form>
-  </a-modal>
-  <a-table bordered :data-source="dataSource" :columns="columns" :loading="loading">
-    <template #bodyCell="{ column, text, record }">
-      <template v-if="column.dataIndex === 'name'">
-        <div class="editable-cell">
-          <div v-if="editableData[record.key]" class="editable-cell-input-wrapper">
-            <a-input v-model:value="editableData[record.key].name" @pressEnter="save(record.key)"/>
-            <check-outlined class="editable-cell-icon-check" @click="save(record.key)"/>
-          </div>
-          <div v-else class="editable-cell-text-wrapper">
-            {{ text || ' ' }}
-            <edit-outlined class="editable-cell-icon" @click="edit(record.key)"/>
-          </div>
-        </div>
-      </template>
-      <template v-else-if="column.dataIndex === 'operation'">
-        <a @click="showModal('Edit',record)">Edit</a>
-        <a-divider type="vertical"/>
-        <a-popconfirm
-            v-if="dataSource.length"
-            title="Sure to delete?"
-            @confirm="onDelete(record.key)"
-        >
-          <a>Delete</a>
-        </a-popconfirm>
-      </template>
-    </template>
-  </a-table>
-</template>
 <script lang="ts" setup>
 import {computed, reactive, ref} from 'vue';
 // import {CheckOutlined, EditOutlined} from '@ant-design/icons-vue';
@@ -88,7 +37,7 @@ for (let i = 0; i < 100; i++) {
 }
 const dataSource = ref(data);
 const count = computed(() => dataSource.value.length + 1);
-const editableData = reactive({});
+const editableData = ref({});
 const edit = key => {
   editableData[key] = cloneDeep(dataSource.value.filter(item => key === item.key)[0]);
 };
@@ -180,7 +129,59 @@ const onFinish = (values: any) => {
   console.log('Success:', values);
 };
 </script>
-<style lang="less">
+
+<template>
+  <a-button class="editable-add-btn" style="margin-bottom: 8px" @click="showModal('add','')">Add</a-button>
+  <a-modal v-model:visible="visible" title="Basic Modal" @ok="handleOk">
+    <a-form
+        ref="formRef"
+        :model="formState"
+        v-bind="layout"
+        name="nest-messages"
+        :validate-messages="validateMessages"
+        @finish="onFinish"
+    >
+      <a-form-item :name="['user', 'name']" label="Name" :rules="[{ required: true }]">
+        <a-input v-model:value="formState.user.name"/>
+      </a-form-item>
+      <a-form-item :name="['user', 'age']" label="Age" :rules="[{ type: 'number', min: 0, max: 99 }]">
+        <a-input-number v-model:value="formState.user.age"/>
+      </a-form-item>
+      <a-form-item :name="['user', 'address']" label="Address">
+        <a-input v-model:value="formState.user.address"/>
+      </a-form-item>
+
+    </a-form>
+  </a-modal>
+  <a-table bordered :data-source="dataSource" :columns="columns" :loading="loading">
+    <template #bodyCell="{ column, text, record }">
+      <template v-if="column.dataIndex === 'name'">
+        <div class="editable-cell">
+          <div v-if="editableData[record.key]" class="editable-cell-input-wrapper">
+            <a-input v-model:value="editableData[record.key].name" @pressEnter="save(record.key)"/>
+            <check-outlined class="editable-cell-icon-check" @click="save(record.key)"/>
+          </div>
+          <div v-else class="editable-cell-text-wrapper">
+            {{ text || ' ' }}
+            <edit-outlined class="editable-cell-icon" @click="edit(record.key)"/>
+          </div>
+        </div>
+      </template>
+      <template v-else-if="column.dataIndex === 'operation'">
+        <a @click="showModal('Edit',record)">Edit</a>
+        <a-divider type="vertical"/>
+        <a-popconfirm
+            v-if="dataSource.length"
+            title="Sure to delete?"
+            @confirm="onDelete(record.key)"
+        >
+          <a>Delete</a>
+        </a-popconfirm>
+      </template>
+    </template>
+  </a-table>
+</template>
+<style lang="scss" scoped>
 .editable-cell {
   position: relative;
 
