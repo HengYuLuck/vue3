@@ -30,7 +30,7 @@ function updatePage() {
   backgroundColor.value = bgColor;
   poem.value = newPoem;
 
-  setTimeout(updatePage, 5000); // 每5秒更新一次
+  // setTimeout(updatePage, 5000); // 每5秒更新一次
 }
 
 onMounted(async () => {
