@@ -1,10 +1,14 @@
 <script setup lang="ts">
 import {onMounted} from "vue";
 import {getTableData} from "@/views/demo/demoService";
-import axios from "axios";
 
 async function getData() {
   const res = await getTableData()
+  const {code, data, msg} = res.data
+  if (code === 200)
+    console.log('成功')
+  else
+    console.log('失败')
 }
 
 

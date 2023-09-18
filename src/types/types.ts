@@ -1,3 +1,9 @@
+declare global {
+    interface Window {
+        g: any
+    }
+}
+
 export interface ToastOptions {
     className?: string
     timeoutMs?: number
