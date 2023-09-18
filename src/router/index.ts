@@ -5,7 +5,7 @@ const router = createRouter({
     routes: [
         {
             path: '/',
-            redirect: '/dashboard'
+            redirect: '/demo'
         },
         {
             path: '/table',
@@ -13,7 +13,7 @@ const router = createRouter({
             // route level code-splitting
             // this generates a separate chunk (About.[hash].js) for this route
             // which is lazy-loaded when the route is visited.
-            component: () => import('../views/TableExample.vue')
+            component: () => import('@/views/TableExample.vue')
         },
         {
             path: '/demo',
@@ -21,7 +21,7 @@ const router = createRouter({
             // route level code-splitting
             // this generates a separate chunk (About.[hash].js) for this route
             // which is lazy-loaded when the route is visited.
-            component: () => import('../views/Demo.vue')
+            component: () => import('@/views/demo/Demo.vue')
         },
         {
             path: '/dashboard',
